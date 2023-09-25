@@ -1,12 +1,13 @@
 const asyncHandler = require("express-async-handler");
 const Contact = require("../models/contactSchema");
+const { constants } = require("../constants");
 //@desc Get all contacts
 //@route GET /api/contacts
 //@access private
 
 const getContacts = asyncHandler(async (req, res) => {
   const contacts = await Contact.find({ user_id: req.user.id });
-  res.status(200).json(contacts);
+  res.status(constants.OK).json(contacts);
 });
 
 //@desc create contact
@@ -16,7 +17,7 @@ const getContacts = asyncHandler(async (req, res) => {
 const createContact = asyncHandler(async (req, res) => {
   const { name, email, phone } = req.body;
   if (!name || !email || !phone) {
-    res.status(400);
+    res.status(constants.VALIDATION_ERROR);
     throw new Error("All fields are mandatory");
   }
   const contact = await Contact.create({
@@ -25,7 +26,7 @@ const createContact = asyncHandler(async (req, res) => {
     phone,
     user_id: req.user.id,
   });
-  res.status(201).json(contact);
+  res.status(constants.CREATED).json(contact);
 });
 
 //@desc Get contact
@@ -35,10 +36,10 @@ const createContact = asyncHandler(async (req, res) => {
 const getContact = asyncHandler(async (req, res) => {
   const contact = await Contact.findById(req.params.id);
   if (!contact) {
-    res.status(404);
+    res.status(constants.NOT_FOUND);
     throw new Error("Contact not found");
   }
-  res.status(200).json(contact);
+  res.status(constants.OK).json(contact);
 });
 
 //@desc update contact
@@ -51,19 +52,19 @@ const updateContact = asyncHandler(async (req, res) => {
 
   const contact = await Contact.findById(id);
   if (!contact) {
-    res.status(404);
+    res.status(constants.NOT_FOUND);
     throw new Error("Contact not found");
   }
 
   if (contact.user_id.toString() !== req.user.id) {
-    res.status(403);
+    res.status(constants.UNAUTHORIZED);
     throw new Error("Operation not authorized");
   }
 
   const updatedContact = await Contact.findByIdAndUpdate(id, body, {
     new: true,
   });
-  res.status(200).json(updatedContact);
+  res.status(constants.OK).json(updatedContact);
 });
 
 //@desc delete contact
@@ -75,17 +76,17 @@ const deleteContact = asyncHandler(async (req, res) => {
 
   const contact = await Contact.findById(id);
   if (!contact) {
-    res.status(404);
+    res.status(constants.NOT_FOUND);
     throw new Error("Contact not found");
   }
 
   if (contact.user_id.toString() !== req.user.id) {
-    res.status(403);
+    res.status(constants.UNAUTHORIZED);
     throw new Error("Operation not authorized");
   }
 
   await Contact.deleteOne({ _id: id });
-  res.status(200).json(contact);
+  res.status(constants.OK).json(contact);
 });
 
 module.exports = {
