@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const Contact = require("../models/contactSchema");
 const { constants } = require("../constants");
+
 //@desc Get all contacts
 //@route GET /api/contacts
 //@access private
